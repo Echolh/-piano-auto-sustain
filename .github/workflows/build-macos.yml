@@ -44,6 +44,9 @@ jobs:
           mkdir -p "$HOME/Library/Audio/Plug-Ins/Components"
           ditto 'build/BassPedalAU_artefacts/Release/AU/Piano Auto Sustain MIDI FX.component' \
             "$HOME/Library/Audio/Plug-Ins/Components/Piano Auto Sustain MIDI FX.component"
+          sudo killall -9 AudioComponentRegistrar 2>/dev/null || true
+          killall -9 AudioComponentRegistrar 2>/dev/null || true
+          sleep 2
           auval -v aumi Pam1 Amup
       - name: Package
         run: python3 scripts/package_portable.py \
