@@ -1,0 +1,49 @@
+Piano Auto Sustain 1.0 · macOS 编译交接说明
+================================================
+
+发给朋友的文件
+----------------
+只需要发送：Piano Auto Sustain 1.0 Mac编译源码交接包.zip
+
+包内不含 Windows 安装包、Windows Cubase 专用 DLL、编译缓存、本机授权文件或授权码。
+
+Mac 朋友需要准备
+----------------
+1. 一台 Intel 或 Apple Silicon Mac。
+2. 完整版 Xcode，并至少启动一次接受许可。
+3. CMake 3.22 或更高版本。
+4. Git 和 Python 3（现代 macOS/Xcode 环境通常可用；缺少时请安装）。
+5. 能访问 GitHub，因为首次配置会自动下载 JUCE 8.0.12。
+
+编译方法
+--------
+1. 解压压缩包。
+2. 打开“终端”，输入 cd 和一个空格，把解压后的 Piano Auto Sustain 1.0 Mac编译源码 文件夹拖进终端，然后回车。
+3. 执行：
+   bash scripts/build-macos.sh
+4. 脚本会构建 Intel + Apple Silicon 通用版本，执行 VST3 测试、AU 验证和本地 ad-hoc 签名。
+5. 成功后成品位于 dist-macos 文件夹：
+   Piano-Auto-Sustain-1.0-macOS-Universal-TEST.zip
+   Piano-Auto-Sustain-1.0-macOS-Universal-TEST.zip.sha256
+6. 请朋友把这两个文件一起发回来。
+
+生成的格式
+----------
+- Piano Auto Sustain.vst3：供支持 VST3 MIDI 路由的 Mac 宿主测试。
+- Piano Auto Sustain MIDI FX.component：供 Logic Pro 的 MIDI FX 插槽测试。
+
+限制与发布要求
+--------------
+- 此交接包用于编译和实机验证，不是已经完成 Apple 公证的正式商业安装包。
+- 脚本使用本机 ad-hoc 签名。正式对外发布仍需开发者签名、公证及目标宿主实测。
+- 目前 Windows 授权版采用 Windows 专用的机器识别和本地加密方式，不能直接编译成 Mac 授权版。
+- 这个包生成的是未授权的 Mac 测试版本。Mac 商业版需要另行实现并验证 Mac 单机授权。
+- Windows 的 Cubase MIDI 插入 DLL 不能用于 Mac；Mac 使用通用 VST3 或 Logic AU MIDI FX。
+
+验证时至少检查
+--------------
+- 插件是否能被宿主扫描并打开统一界面。
+- 实时弹奏是否有声音和自动延音。
+- 播放时是否正常生成延音。
+- 录制后是否保存 CC64。
+- Logic 中 AU MIDI FX 是否通过 auval 并能正确连接钢琴音源。
