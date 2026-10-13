@@ -119,11 +119,72 @@ shasum -a 256 -c Piano-Auto-Sustain-1.0-macOS-Universal-*.zip.sha256
 
 ---
 
-## 五、构建结果记录
+## 五、正式发版：GitHub Releases 自动发布
+
+Artifact 只是开发用的临时产物（需登录 GitHub 才能下载、保留 30 天后自动删除）。
+**正式对外分发用 Releases**：任何人无需登录即可下载、永久保留，适合发给 Mac 用户。
+
+### 工作方式
+
+- workflow 只在推送 **`v` 开头的 tag** 时走发版流程（`tags: ['v*']`），普通 push 到
+  `main` 仍然只出 Artifact，不会刷出多余"版本"
+- tag 构建成功后自动执行 `gh release create`，把 `dist/` 里的 zip + sha256 挂为附件，
+  Release 说明自动包含：插件格式、auval 通过、ad-hoc 签名未公证、首次打开的
+  "仍要打开"操作指引、对应源码 commit
+- 需要的权限已在 workflow 里配好（`permissions: contents: write`）
+
+### 发版命令（仅此一条）
+
+```bash
+git tag v1.0.1
+git push origin v1.0.1
+```
+
+云端自动：构建 → 测试 → auval → 签名 → 打包 → 发布到
+https://github.com/Echolh/-piano-auto-sustain/releases
+
+删除/重发一个版本：
+
+```bash
+git tag -d v1.0.1 && git push origin :refs/tags/v1.0.1   # 删除远程 tag 和 Release（需网页再删 Release）
+```
+
+### Release 下载的是什么
+
+下载的 `Piano-Auto-Sustain-*.zip` 是**编译完成的成品**，解压即用，无需用户编译：
+
+```
+Piano-Auto-Sustain-1.0-...-TEST/
+├── Piano Auto Sustain.vst3               ← VST3 插件（含 arm64+Intel 双架构二进制）
+├── Piano Auto Sustain MIDI FX.component  ← AU 插件（Logic Pro 用，已过 auval）
+├── Install.command / Uninstall.command   ← 双击安装/卸载
+├── BUILD-INFO.json                       ← 版本与 commit 信息
+└── *.sha256                              ← 完整性校验
+```
+
+注意：音频插件不是双击独立运行的 `.app`，而是装进宿主使用——用户下载解压后
+双击 `Install.command`，再在 Logic Pro / Cubase / REAPER 里加载即可。
+`.vst3` / `.component` 内 `Contents/MacOS/` 下就是真正的可执行二进制。
+
+用户下载入口：仓库页右侧 **Releases** → 点对应版本 → 附件直接下载（免登录、永久有效）。
+
+### 命名建议
+
+当前包为 ad-hoc 签名的未公证测试版，tag 名称建议带 `test`/`beta` 字样
+（如 `v1.0.0-mac-test.1`）；正式商业版完成 Apple 签名公证后再发 `v1.0.0` 正式号。
+
+---
+
+## 六、构建结果记录
 
 - 第 1 次（run 38420106834）：失败——编译/测试/签名全部通过，auval 因组件注册缓存过期找不到插件。修复：auval 前 `killall -9 AudioComponentRegistrar`。
 - 第 2 次（run 38424203448）：失败——**auval 已通过（AU VALIDATION SUCCEEDED）**，挂在打包步骤：YAML `run:` 折叠块里行尾 `\` 续行符被折叠成字面参数，argparse 报 `--build` 缺失。修复：打包命令改为单行。
 - 第 3 次（run 38426209806，2026-10-14 00:04 UTC+8）：**成功** ✅
+- 第 4 次（run 38428504608，tag `v1.0.0-mac-test.1`，2026-10-14 00:24）：**成功** ✅
+  自动发版链路首次验证通过：Release 已自动创建，附件为
+  `Piano-Auto-Sustain-1.0-macOS-Universal-TEST.zip`（13 MB）+ `.sha256`，
+  下载页：https://github.com/Echolh/-piano-auto-sustain/releases/tag/v1.0.0-mac-test.1
+  （免登录、永久有效的直链）
   - Artifact：`Piano-Auto-Sustain-1.0-macOS-Universal`（13 MB）
   - 内容：`Piano Auto Sustain.vst3` + `Piano Auto Sustain MIDI FX.component`（均含 ad-hoc 签名）、`Install.command` / `Uninstall.command` 安装卸载脚本、`BUILD-INFO.json`、SHA256 校验文件
   - 本地已下载并验证：`shasum -a 256 -c` 通过，双架构（arm64 + x86_64）签名完整
