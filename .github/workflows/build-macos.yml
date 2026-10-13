@@ -49,8 +49,7 @@ jobs:
           sleep 2
           auval -v aumi Pam1 Amup
       - name: Package
-        run: python3 scripts/package_portable.py \
-          --build build --output dist --platform macOS-Universal --commit "$GITHUB_SHA"
+        run: python3 scripts/package_portable.py --build build --output dist --platform macOS-Universal --commit "$GITHUB_SHA"
       - uses: actions/upload-artifact@v4
         with:
           name: Piano-Auto-Sustain-1.0-macOS-Universal
